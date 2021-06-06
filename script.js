@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
         if(winner != ''){
             endgame();
-            result.innerHTML = `Player ${winner} has won.`;
+            result.innerHTML = `Yay! ${winner} has won.`;
         }else if(checkforTie()){
             endgame();
             result.innerHTML = `Game Tied.`;
@@ -182,7 +182,8 @@ document.addEventListener('DOMContentLoaded', function(){
         }
         
         let btn = document.createElement('button');
-        btn.innerHTML = 'New Game?'
+        btn.innerHTML = 'New Game?';
+        btn.setAttribute('class', 'new-btn');
         resultDiv.appendChild(btn);
 
         btn.addEventListener('click', function(){
