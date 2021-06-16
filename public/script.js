@@ -44,11 +44,13 @@ document.addEventListener('DOMContentLoaded', function(){
         let winner;
 
         if(player){ 
-            this.innerHTML = 'X';
+            // this.innerHTML = 'X';
+            socket.emit('chat message', {message: 'X', boxID: thisBoxID});
             winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
         }
         else{
-            this.innerHTML = 'O';
+            // this.innerHTML = 'O';
+            socket.emit('chat message', {message: 'O', boxID: thisBoxID});
             winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
         }
 
@@ -67,6 +69,9 @@ document.addEventListener('DOMContentLoaded', function(){
         else currPlayer.innerHTML = 'O';
     }
     
+    socket.on('chat message', msg => {
+        document.getElementById(`box${msg.boxID + 1}`).innerHTML = msg.message;
+    })
     
     // check grid for possible win
 

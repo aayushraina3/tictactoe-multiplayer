@@ -13,6 +13,12 @@ app.get('/', (req, res)=>{
 
 io.on('connection', (socket) => {
     console.log('player connected');
+    socket.on('chat message', msg => {
+        console.log(msg.message);
+        console.log(msg.boxID);
+        io.emit('chat message', msg);
+    });
+
     socket.on('disconnect', ()=>{
         console.log('player disconnected');
     });
