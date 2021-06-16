@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function(){
-    
+    var socket = io();
+
     const b0 = document.getElementById('box1'); //0
     const b1 = document.getElementById('box2'); //1
     const b2 = document.getElementById('box3'); //2
