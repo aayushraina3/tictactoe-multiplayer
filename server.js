@@ -19,6 +19,11 @@ io.on('connection', (socket) => {
         io.emit('chat message', msg);
     });
 
+    socket.on('winner', msg => {
+        console.log(msg);
+        io.emit('winner', msg);
+    })
+
     socket.on('disconnect', ()=>{
         console.log('player disconnected');
     });

@@ -36,41 +36,71 @@ document.addEventListener('DOMContentLoaded', function(){
     function playerTurn(){
 
         count ++;
-        this.style.backgroundColor = '#508688';
-        this.removeEventListener('click', playerTurn);
+        // this.style.backgroundColor = '#508688';
+        // this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
  
-        let winner;
+        
 
         if(player){ 
             // this.innerHTML = 'X';
             socket.emit('chat message', {message: 'X', boxID: thisBoxID});
-            winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
+            // winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
         }
         else{
             // this.innerHTML = 'O';
             socket.emit('chat message', {message: 'O', boxID: thisBoxID});
-            winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
+            // winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
+        }
+
+        
+        
+        // change turn
+        // player = !player;
+        
+        // if(player) currPlayer.innerHTML = 'X';
+        // else currPlayer.innerHTML = 'O';
+    }
+    let winner;
+    socket.on('chat message', msg => {
+        let targetBox = document.getElementById(`box${msg.boxID + 1}`);
+        targetBox.innerHTML = msg.message;
+        targetBox.style.backgroundColor = '#508688';
+        targetBox.removeEventListener('click', playerTurn);
+
+        if(player){
+            winner = (checkForWinner(msg.boxID,'X')) ? 'X' : '';
+        }else{
+            winner = (checkForWinner(msg.boxID,'O')) ? 'O' : '';
         }
 
         if(winner != ''){
-            endgame();
-            result.innerHTML = `Yay! ${winner} has won.`;
+            // endgame();
+            // result.innerHTML = `Yay! ${winner} has won.`;
+            socket.emit('winner', winner);
         }else if(checkforTie()){
-            endgame();
-            result.innerHTML = `Game Tied.`;
+            // endgame();
+            // result.innerHTML = `Game Tied.`;
+            socket.emit('winner', 'tie');
         }
-        
+
         // change turn
         player = !player;
         
         if(player) currPlayer.innerHTML = 'X';
         else currPlayer.innerHTML = 'O';
-    }
-    
-    socket.on('chat message', msg => {
-        document.getElementById(`box${msg.boxID + 1}`).innerHTML = msg.message;
+    })
+
+    socket.on('winner', msg => {
+        console.log(msg)
+        if(msg != 'tie'){
+            result.innerHTML = `Yay! ${msg} has won.`;
+            endgame();
+        }else{
+            result.innerHTML = `Game Tied.`;
+            endgame();
+        }
     })
     
     // check grid for possible win
