@@ -12,16 +12,15 @@ app.get('/', (req, res)=>{
 })
 
 io.on('connection', (socket) => {
-    console.log('player connected');
-    socket.on('chat message', msg => {
-        console.log(msg.message);
-        console.log(msg.boxID);
-        io.emit('chat message', msg);
+    console.log(`player connected : ${socket.id}`);
+
+    socket.on('turn', turnData => {
+        socket.broadcast.emit('turn', turnData);
     });
 
     socket.on('winner', msg => {
         console.log(msg);
-        io.emit('winner', msg);
+        socket.broadcast.emit('winner', msg);
     })
 
     socket.on('disconnect', ()=>{

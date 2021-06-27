@@ -36,66 +36,105 @@ document.addEventListener('DOMContentLoaded', function(){
     function playerTurn(){
 
         count ++;
-        // this.style.backgroundColor = '#508688';
-        // this.removeEventListener('click', playerTurn);
+        this.style.backgroundColor = '#508688';
+        this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
  
         
 
-        if(player){ 
-            // this.innerHTML = 'X';
-            socket.emit('chat message', {message: 'X', boxID: thisBoxID});
-            // winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
+        if(player){ // X
+            this.innerHTML = 'X';
+            socket.emit('turn', {player: 'X', boxID: thisBoxID});
+
+            winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
+            if(winner != ''){
+                endgame();
+                result.innerHTML = `Yay! you have won.`;
+                socket.emit('winner', winner);
+            }else if(checkforTie()){
+                endgame();
+                result.innerHTML = `Game Tied.`;
+                socket.emit('winner', 'tie');
+            }
         }
-        else{
-            // this.innerHTML = 'O';
-            socket.emit('chat message', {message: 'O', boxID: thisBoxID});
-            // winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
+        else{ // O
+            this.innerHTML = 'O';
+            socket.emit('turn', {player: 'O', boxID: thisBoxID});
+
+            winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
+            if(winner != ''){
+                endgame();
+                result.innerHTML = `Yay! you have won.`;
+                socket.emit('winner', winner);
+            }else if(checkforTie()){
+                endgame();
+                result.innerHTML = `Game Tied.`;
+                socket.emit('winner', 'tie');
+            }
         }
 
         
         
-        // change turn
-        // player = !player;
-        
-        // if(player) currPlayer.innerHTML = 'X';
-        // else currPlayer.innerHTML = 'O';
-    }
-    let winner;
-    socket.on('chat message', msg => {
-        let targetBox = document.getElementById(`box${msg.boxID + 1}`);
-        targetBox.innerHTML = msg.message;
-        targetBox.style.backgroundColor = '#508688';
-        targetBox.removeEventListener('click', playerTurn);
-
-        if(player){
-            winner = (checkForWinner(msg.boxID,'X')) ? 'X' : '';
-        }else{
-            winner = (checkForWinner(msg.boxID,'O')) ? 'O' : '';
-        }
-
-        if(winner != ''){
-            // endgame();
-            // result.innerHTML = `Yay! ${winner} has won.`;
-            socket.emit('winner', winner);
-        }else if(checkforTie()){
-            // endgame();
-            // result.innerHTML = `Game Tied.`;
-            socket.emit('winner', 'tie');
-        }
-
-        // change turn
+        //change turn
         player = !player;
         
         if(player) currPlayer.innerHTML = 'X';
         else currPlayer.innerHTML = 'O';
+    }
+    
+    let winner;
+    
+    socket.on('turn', msg => {
+        let targetBox = document.getElementById(`box${msg.boxID + 1}`);
+        targetBox.innerHTML = msg.player;
+        targetBox.style.backgroundColor = '#508688';
+        targetBox.removeEventListener('click', playerTurn);
+
+        // if(msg.player == "X"){
+        //     winner = (checkForWinner(msg.boxID,'X')) ? 'X' : '';
+        //     if(winner != ''){
+        //         endgame();
+        //         result.innerHTML = `Yay! you have won.`;
+        //         socket.emit('winner', winner);
+        //     }else if(checkforTie()){
+        //         endgame();
+        //         result.innerHTML = `Game Tied.`;
+        //         socket.emit('winner', 'tie');
+        //     }
+        // }else{
+        //     winner = (checkForWinner(msg.boxID,'O')) ? 'O' : '';
+        //     if(winner != ''){
+        //         endgame();
+        //         result.innerHTML = `Yay! you have won.`;
+        //         socket.emit('winner', winner);
+        //     }else if(checkforTie()){
+        //         endgame();
+        //         result.innerHTML = `Game Tied.`;
+        //         socket.emit('winner', 'tie');
+        //     }
+        // }
+
+        // if(winner != ''){
+        //     //endgame();
+        //     result.innerHTML = `Yay! ${winner} has won.`;
+        //     socket.emit('winner', winner);
+        // }else if(checkforTie()){
+        //     //endgame();
+        //     result.innerHTML = `Game Tied.`;
+        //     socket.emit('winner', 'tie');
+        // }
+
+        // change turn
+        player = !player;
+        
+        if(msg.player == "X") currPlayer.innerHTML = 'O';
+        else currPlayer.innerHTML = 'X';
     })
 
     socket.on('winner', msg => {
-        console.log(msg)
         if(msg != 'tie'){
-            result.innerHTML = `Yay! ${msg} has won.`;
+            result.innerHTML = `Sorry! ${msg} has won.`;
             endgame();
         }else{
             result.innerHTML = `Game Tied.`;
