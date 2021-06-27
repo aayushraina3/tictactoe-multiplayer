@@ -16,22 +16,44 @@ document.addEventListener('DOMContentLoaded', function(){
     const resultDiv = document.getElementById('resultDiv');
     
     
-    // player true : X and false : O
-    let player = true;
+    // your turn: true, opponent's turn: false
+    let playertoMove;
+
+    // X or O
+    let player;
+
+    socket.on("game begin", playerData => {
+        document.getElementById("status").innerHTML = "Game started"
+        player = playerData.player;
+
+        if(player == "X"){
+            playertoMove = true;
+            currPlayer.innerHTML = "Your turn";
+        }
+        else{
+            playertoMove = false;
+            currPlayer.innerHTML = "Opponent's turn";
+        }
+
+        gameSetup();
+    })
 
 
     // no of boxes played
     let count = 0;
-    
-    
-    // add click event listener to boxes
     const boxes = document.getElementsByClassName('box');
-    for(let i=0; i<boxes.length; i++){
-        boxes.item(i).setAttribute('data-id', i);
-        boxes.item(i).addEventListener('click', playerTurn);
+    
+    function gameSetup(){
+        // add click event listener to boxes
+        
+        for(let i=0; i<boxes.length; i++){
+            boxes.item(i).setAttribute('data-id', i);
+            boxes.item(i).addEventListener('click', playerTurn);
+        }
     }
 
 
+    
     // individual player's turn
     function playerTurn(){
 
@@ -40,50 +62,36 @@ document.addEventListener('DOMContentLoaded', function(){
         this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
- 
+        console.log(player);
+        this.innerHTML = player;
+        socket.emit('turn', {player: player, boxID: thisBoxID});
         
+        
+        // change turn for current(sending) socket
+        playertoMove = !playertoMove;
+        
+        if(playertoMove) currPlayer.innerHTML = "Your turn";
+        else currPlayer.innerHTML = "Opponent's turn";
 
-        if(player){ // X
-            this.innerHTML = 'X';
-            socket.emit('turn', {player: 'X', boxID: thisBoxID});
-
-            winner = (checkForWinner(thisBoxID,'X')) ? 'X' : '';
-            if(winner != ''){
-                endgame();
-                result.innerHTML = `Yay! you have won.`;
-                socket.emit('winner', winner);
-            }else if(checkforTie()){
-                endgame();
-                result.innerHTML = `Game Tied.`;
-                socket.emit('winner', 'tie');
-            }
+        
+        // check for winner
+        winner = (checkForWinner(thisBoxID,player)) ? player : '';
+        if(winner != ''){
+            endgame();
+            result.innerHTML = `Yay! you have won.`;
+            
+            // emit winner event with winner
+            socket.emit('winner', winner);
+        }else if(checkforTie()){
+            endgame();
+            result.innerHTML = `Game Tied.`;
+            
+            // emit winner event with tie
+            socket.emit('winner', 'tie');
         }
-        else{ // O
-            this.innerHTML = 'O';
-            socket.emit('turn', {player: 'O', boxID: thisBoxID});
-
-            winner = (checkForWinner(thisBoxID,'O')) ? 'O' : '';
-            if(winner != ''){
-                endgame();
-                result.innerHTML = `Yay! you have won.`;
-                socket.emit('winner', winner);
-            }else if(checkforTie()){
-                endgame();
-                result.innerHTML = `Game Tied.`;
-                socket.emit('winner', 'tie');
-            }
-        }
-
-        
-        
-        //change turn
-        player = !player;
-        
-        if(player) currPlayer.innerHTML = 'X';
-        else currPlayer.innerHTML = 'O';
     }
+
     
-    let winner;
     
     socket.on('turn', msg => {
         let targetBox = document.getElementById(`box${msg.boxID + 1}`);
@@ -91,54 +99,22 @@ document.addEventListener('DOMContentLoaded', function(){
         targetBox.style.backgroundColor = '#508688';
         targetBox.removeEventListener('click', playerTurn);
 
-        // if(msg.player == "X"){
-        //     winner = (checkForWinner(msg.boxID,'X')) ? 'X' : '';
-        //     if(winner != ''){
-        //         endgame();
-        //         result.innerHTML = `Yay! you have won.`;
-        //         socket.emit('winner', winner);
-        //     }else if(checkforTie()){
-        //         endgame();
-        //         result.innerHTML = `Game Tied.`;
-        //         socket.emit('winner', 'tie');
-        //     }
-        // }else{
-        //     winner = (checkForWinner(msg.boxID,'O')) ? 'O' : '';
-        //     if(winner != ''){
-        //         endgame();
-        //         result.innerHTML = `Yay! you have won.`;
-        //         socket.emit('winner', winner);
-        //     }else if(checkforTie()){
-        //         endgame();
-        //         result.innerHTML = `Game Tied.`;
-        //         socket.emit('winner', 'tie');
-        //     }
-        // }
+        // change turn for other(receiving) socket
+        playertoMove = !playertoMove;
 
-        // if(winner != ''){
-        //     //endgame();
-        //     result.innerHTML = `Yay! ${winner} has won.`;
-        //     socket.emit('winner', winner);
-        // }else if(checkforTie()){
-        //     //endgame();
-        //     result.innerHTML = `Game Tied.`;
-        //     socket.emit('winner', 'tie');
-        // }
-
-        // change turn
-        player = !player;
-        
-        if(msg.player == "X") currPlayer.innerHTML = 'O';
-        else currPlayer.innerHTML = 'X';
+        if(playertoMove) currPlayer.innerHTML = "Your turn";
+        else currPlayer.innerHTML = "Opponent's turn";
     })
 
+    
+    
     socket.on('winner', msg => {
         if(msg != 'tie'){
+            endgame();
             result.innerHTML = `Sorry! ${msg} has won.`;
-            endgame();
         }else{
-            result.innerHTML = `Game Tied.`;
             endgame();
+            result.innerHTML = `Game Tied.`;
         }
     })
     
@@ -255,6 +231,8 @@ document.addEventListener('DOMContentLoaded', function(){
         for(let i=0; i<boxes.length; i++){
             boxes.item(i).removeEventListener('click', playerTurn);
         }
+
+        currPlayer.innerHTML = "";
         
         let btn = document.createElement('button');
         btn.innerHTML = 'New Game?';
