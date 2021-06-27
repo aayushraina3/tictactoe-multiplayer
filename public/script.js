@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function(){
             currPlayer.innerHTML = "Your turn";
         }
         else{
+            document.querySelector(".boxes-overlay").style.display = "block";
             playertoMove = false;
             currPlayer.innerHTML = "Opponent's turn";
         }
@@ -70,9 +71,14 @@ document.addEventListener('DOMContentLoaded', function(){
         // change turn for current(sending) socket
         playertoMove = !playertoMove;
         
-        if(playertoMove) currPlayer.innerHTML = "Your turn";
-        else currPlayer.innerHTML = "Opponent's turn";
-
+        if(playertoMove){
+            document.querySelector(".boxes-overlay").style.display = "none";
+            currPlayer.innerHTML = "Your turn";
+        } 
+        else{
+            document.querySelector(".boxes-overlay").style.display = "block";
+            currPlayer.innerHTML = "Opponent's turn";
+        } 
         
         // check for winner
         winner = (checkForWinner(thisBoxID,player)) ? player : '';
@@ -102,8 +108,14 @@ document.addEventListener('DOMContentLoaded', function(){
         // change turn for other(receiving) socket
         playertoMove = !playertoMove;
 
-        if(playertoMove) currPlayer.innerHTML = "Your turn";
-        else currPlayer.innerHTML = "Opponent's turn";
+        if(playertoMove){
+            document.querySelector(".boxes-overlay").style.display = "none";
+            currPlayer.innerHTML = "Your turn";
+        } 
+        else{
+            document.querySelector(".boxes-overlay").style.display = "block";
+            currPlayer.innerHTML = "Opponent's turn";
+        } 
     })
 
     
