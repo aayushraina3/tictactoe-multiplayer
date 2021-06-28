@@ -63,10 +63,10 @@ document.addEventListener('DOMContentLoaded', function(){
         this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
-        console.log(player);
-        this.innerHTML = player;
-        socket.emit('turn', {player: player, boxID: thisBoxID});
         
+        this.innerHTML = player;
+        socket.emit('turn', {player: player, boxID: thisBoxID, count: count});
+        console.log("count on socket emit: " + count);
         
         // change turn for current(sending) socket
         playertoMove = !playertoMove;
@@ -88,7 +88,8 @@ document.addEventListener('DOMContentLoaded', function(){
             
             // emit winner event with winner
             socket.emit('winner', winner);
-        }else if(checkforTie()){
+        }
+        else if(checkforTie()){
             endgame();
             result.innerHTML = `Game Tied.`;
             
@@ -100,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function(){
     
     
     socket.on('turn', msg => {
+
         let targetBox = document.getElementById(`box${msg.boxID + 1}`);
         targetBox.innerHTML = msg.player;
         targetBox.style.backgroundColor = '#508688';
@@ -115,7 +117,10 @@ document.addEventListener('DOMContentLoaded', function(){
         else{
             document.querySelector(".boxes-overlay").style.display = "block";
             currPlayer.innerHTML = "Opponent's turn";
-        } 
+        }
+
+        count = msg.count
+        console.log("count on socket receive: "+count);
     })
 
     

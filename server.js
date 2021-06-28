@@ -53,6 +53,7 @@ io.on('connection', (socket) => {
     }
 
     socket.on('turn', turnData => {
+        console.log("turn");
         socket.broadcast.emit('turn', turnData);
     });
 
