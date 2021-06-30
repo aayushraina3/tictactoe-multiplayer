@@ -53,7 +53,6 @@ io.on('connection', (socket) => {
     }
 
     socket.on('turn', turnData => {
-        console.log("turn");
         socket.broadcast.emit('turn', turnData);
     });
 
@@ -68,5 +67,5 @@ io.on('connection', (socket) => {
 })
 
 server.listen(8000, ()=>{
-    console.log('Fuck yeah!');
+    console.log('Server up!');
 })

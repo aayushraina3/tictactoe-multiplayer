@@ -37,11 +37,12 @@ h1{
     display: grid;
     grid-template-columns: repeat(3, 100px);
     grid-template-rows: repeat(3, 100px);
-    gap: 15px;
+    gap: 10px;
+    background-color: black;
 }
 
 .box {
-    background-color: #5f9ea0;
+    background-color: aliceblue;
     color: #fff;
     font-size: 18px;
     display: flex;
@@ -67,4 +68,9 @@ h1{
     height: 360px;
     margin-top: 200px;
     display: none;
+}
+
+img{
+    width: 100px;
+    height: 100px
 }

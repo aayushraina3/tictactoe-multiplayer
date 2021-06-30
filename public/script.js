@@ -59,12 +59,22 @@ document.addEventListener('DOMContentLoaded', function(){
     function playerTurn(){
 
         count ++;
-        this.style.backgroundColor = '#508688';
+        // this.style.backgroundColor = '#508688';
         this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
         
-        this.innerHTML = player;
+        let img = document.createElement("img");
+        this.appendChild(img);
+        if(player == "X"){
+            this.setAttribute("value", "X");
+            img.setAttribute("src", "images/x.png");
+        }
+        else{
+            this.setAttribute("value", "O");
+            img.setAttribute("src", "images/o.png");
+        } 
+
         socket.emit('turn', {player: player, boxID: thisBoxID, count: count});
         console.log("count on socket emit: " + count);
         
@@ -103,8 +113,20 @@ document.addEventListener('DOMContentLoaded', function(){
     socket.on('turn', msg => {
 
         let targetBox = document.getElementById(`box${msg.boxID + 1}`);
-        targetBox.innerHTML = msg.player;
-        targetBox.style.backgroundColor = '#508688';
+        //targetBox.innerHTML = msg.player;
+        let img = document.createElement("img");
+        targetBox.appendChild(img);
+        if(msg.player == "X"){
+            targetBox.setAttribute("value", "X");
+            img.setAttribute("src", "images/x.png");
+        }
+        else{
+            targetBox.setAttribute("value", "O");
+            img.setAttribute("src", "images/o.png");
+        } 
+        // if(msg.player == "X") img.setAttribute("src", "images/x.png");
+        // else img.setAttribute("src", "images/o.png");
+        // targetBox.style.backgroundColor = '#508688';
         targetBox.removeEventListener('click', playerTurn);
 
         // change turn for other(receiving) socket
@@ -147,9 +169,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 // 1 2
                 // 3 6
                 // 4 8
-                if (b1.innerHTML == symbol && b2.innerHTML == symbol || 
-                    b3.innerHTML == symbol && b6.innerHTML == symbol || 
-                    b4.innerHTML == symbol && b8.innerHTML == symbol){
+                if (b1.getAttribute("value") == symbol && b2.getAttribute("value") == symbol || 
+                    b3.getAttribute("value") == symbol && b6.getAttribute("value") == symbol || 
+                    b4.getAttribute("value") == symbol && b8.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -157,8 +179,8 @@ document.addEventListener('DOMContentLoaded', function(){
             case 1: {
                 // 0 2
                 // 4 7
-                if (b0.innerHTML == symbol && b2.innerHTML == symbol || 
-                    b4.innerHTML == symbol && b7.innerHTML == symbol){
+                if (b0.getAttribute("value") == symbol && b2.getAttribute("value") == symbol || 
+                    b4.getAttribute("value") == symbol && b7.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -167,9 +189,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 // 0 1
                 // 4 6
                 // 5 8
-                if (b0.innerHTML == symbol && b1.innerHTML == symbol || 
-                    b4.innerHTML == symbol && b6.innerHTML == symbol || 
-                    b5.innerHTML == symbol && b8.innerHTML == symbol){
+                if (b0.getAttribute("value") == symbol && b1.getAttribute("value") == symbol || 
+                    b4.getAttribute("value") == symbol && b6.getAttribute("value") == symbol || 
+                    b5.getAttribute("value") == symbol && b8.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -177,8 +199,8 @@ document.addEventListener('DOMContentLoaded', function(){
             case 3: {
                 // 0 6
                 // 4 5
-                if (b0.innerHTML == symbol && b6.innerHTML == symbol || 
-                    b4.innerHTML == symbol && b5.innerHTML == symbol){
+                if (b0.getAttribute("value") == symbol && b6.getAttribute("value") == symbol || 
+                    b4.getAttribute("value") == symbol && b5.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -188,10 +210,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 // 2 6
                 // 1 7
                 // 3 5
-                if (b0.innerHTML == symbol && b8.innerHTML == symbol || 
-                    b2.innerHTML == symbol && b6.innerHTML == symbol || 
-                    b1.innerHTML == symbol && b7.innerHTML == symbol ||
-                    b3.innerHTML == symbol && b5.innerHTML == symbol){
+                if (b0.getAttribute("value") == symbol && b8.getAttribute("value") == symbol || 
+                    b2.getAttribute("value") == symbol && b6.getAttribute("value") == symbol || 
+                    b1.getAttribute("value") == symbol && b7.getAttribute("value") == symbol ||
+                    b3.getAttribute("value") == symbol && b5.getAttribute("value") == symbol){
                     return true;
                 }
                 break;
@@ -199,8 +221,8 @@ document.addEventListener('DOMContentLoaded', function(){
             case 5: {
                 // 2 8
                 // 3 4
-                if (b2.innerHTML == symbol && b8.innerHTML == symbol || 
-                    b3.innerHTML == symbol && b4.innerHTML == symbol){
+                if (b2.getAttribute("value") == symbol && b8.getAttribute("value") == symbol || 
+                    b3.getAttribute("value") == symbol && b4.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -209,9 +231,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 // 0 3
                 // 2 4
                 // 7 8
-                if (b0.innerHTML == symbol && b3.innerHTML == symbol || 
-                    b2.innerHTML == symbol && b4.innerHTML == symbol || 
-                    b7.innerHTML == symbol && b8.innerHTML == symbol){
+                if (b0.getAttribute("value") == symbol && b3.getAttribute("value") == symbol || 
+                    b2.getAttribute("value") == symbol && b4.getAttribute("value") == symbol || 
+                    b7.getAttribute("value") == symbol && b8.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -219,8 +241,8 @@ document.addEventListener('DOMContentLoaded', function(){
             case 7: {
                 // 1 4
                 // 6 8
-                if (b1.innerHTML == symbol && b4.innerHTML == symbol || 
-                    b6.innerHTML == symbol && b8.innerHTML == symbol){
+                if (b1.getAttribute("value") == symbol && b4.getAttribute("value") == symbol || 
+                    b6.getAttribute("value") == symbol && b8.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
@@ -229,9 +251,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 // 2 5
                 // 0 4
                 // 6 7
-                if (b2.innerHTML == symbol && b5.innerHTML == symbol || 
-                    b0.innerHTML == symbol && b4.innerHTML == symbol || 
-                    b6.innerHTML == symbol && b7.innerHTML == symbol){
+                if (b2.getAttribute("value") == symbol && b5.getAttribute("value") == symbol || 
+                    b0.getAttribute("value") == symbol && b4.getAttribute("value") == symbol || 
+                    b6.getAttribute("value") == symbol && b7.getAttribute("value") == symbol){
                     return true;
                 } 
                 break;
