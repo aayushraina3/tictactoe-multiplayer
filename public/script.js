@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', function(){
     let currPlayer = document.getElementById('currPlayer');
     const result = document.getElementById('result');
     const resultDiv = document.getElementById('resultDiv');
-    
+
+    // no of boxes played
+    let count = 0;
+    const boxes = document.getElementsByClassName('box');
     
     // your turn: true, opponent's turn: false
     let playertoMove;
@@ -22,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // X or O
     let player;
 
+    
     socket.on("game begin", playerData => {
         document.getElementById("status").innerHTML = "Game started"
         player = playerData.player;
@@ -40,9 +44,7 @@ document.addEventListener('DOMContentLoaded', function(){
     })
 
 
-    // no of boxes played
-    let count = 0;
-    const boxes = document.getElementsByClassName('box');
+    
     
     function gameSetup(){
         // add click event listener to boxes
@@ -55,24 +57,23 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
     
-    // individual player's turn
+    // individual player's turn :
+    // -> Add 1 to count of turns
+    // -> remove click listener from 'this' box
+    // -> add turn symbol to 'this' box node
+    // -> emit turn event to server with current turn info to be displayed on opponent's board
     function playerTurn(){
 
         count ++;
-        // this.style.backgroundColor = '#508688';
         this.removeEventListener('click', playerTurn);
         
         let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
         
-        let img = document.createElement("img");
-        this.appendChild(img);
         if(player == "X"){
-            this.setAttribute("value", "X");
-            img.setAttribute("src", "images/x.png");
+            addSymbolToNode(this, "X", "images/x.png");
         }
         else{
-            this.setAttribute("value", "O");
-            img.setAttribute("src", "images/o.png");
+            addSymbolToNode(this, "O", "images/o.png");
         } 
 
         socket.emit('turn', {player: player, boxID: thisBoxID, count: count});
@@ -113,21 +114,14 @@ document.addEventListener('DOMContentLoaded', function(){
     socket.on('turn', msg => {
 
         let targetBox = document.getElementById(`box${msg.boxID + 1}`);
-        //targetBox.innerHTML = msg.player;
-        let img = document.createElement("img");
-        targetBox.appendChild(img);
+        targetBox.removeEventListener('click', playerTurn);
+
         if(msg.player == "X"){
-            targetBox.setAttribute("value", "X");
-            img.setAttribute("src", "images/x.png");
+            addSymbolToNode(targetBox, "X", "images/x.png");
         }
         else{
-            targetBox.setAttribute("value", "O");
-            img.setAttribute("src", "images/o.png");
-        } 
-        // if(msg.player == "X") img.setAttribute("src", "images/x.png");
-        // else img.setAttribute("src", "images/o.png");
-        // targetBox.style.backgroundColor = '#508688';
-        targetBox.removeEventListener('click', playerTurn);
+            addSymbolToNode(targetBox, "O", "images/o.png");
+        }
 
         // change turn for other(receiving) socket
         playertoMove = !playertoMove;
@@ -156,6 +150,19 @@ document.addEventListener('DOMContentLoaded', function(){
             result.innerHTML = `Game Tied.`;
         }
     })
+
+
+    
+    // create image element with turn symbol
+    // append image to box
+    function addSymbolToNode(node, value, src){
+        let img = document.createElement("img");
+        img.setAttribute("src", src);
+        node.appendChild(img);
+        node.setAttribute("value", "X");
+    }
+    
+    
     
     // check grid for possible win
 
