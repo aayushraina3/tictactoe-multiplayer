@@ -11,40 +11,28 @@ document.addEventListener('DOMContentLoaded', function(){
     const b7 = document.getElementById('box8'); //7
     const b8 = document.getElementById('box9'); //8
 
-    let currPlayer = document.getElementById('currPlayer');
+    
+    const currPlayer = document.getElementById('currPlayer');
     const result = document.getElementById('result');
     const resultDiv = document.getElementById('resultDiv');
+    const boxOverlay = document.querySelector(".boxes-overlay");
+    const boxes = document.getElementsByClassName('box');
+    const gameStatus = document.getElementById("status");
 
+    
     // no of boxes played
     let count = 0;
-    const boxes = document.getElementsByClassName('box');
+    
     
     // your turn: true, opponent's turn: false
     let playertoMove;
 
+    
     // X or O
     let player;
 
     
-    socket.on("game begin", playerData => {
-        document.getElementById("status").innerHTML = "Game started"
-        player = playerData.player;
 
-        if(player == "X"){
-            playertoMove = true;
-            currPlayer.innerHTML = "Your turn";
-        }
-        else{
-            document.querySelector(".boxes-overlay").style.display = "block";
-            playertoMove = false;
-            currPlayer.innerHTML = "Opponent's turn";
-        }
-
-        gameSetup();
-    })
-
-
-    
     
     function gameSetup(){
         // add click event listener to boxes
@@ -61,109 +49,75 @@ document.addEventListener('DOMContentLoaded', function(){
     // -> Add 1 to count of turns
     // -> remove click listener from 'this' box
     // -> add turn symbol to 'this' box node
-    // -> emit turn event to server with current turn info to be displayed on opponent's board
+    // -> emit turn event to server
+    //    (pass player, box id and turn count)
+    // -> change playerToMove 
+    //    (to signify opponent's turn)
+    // -> check for winner or tie and emit winner event
     function playerTurn(){
 
         count ++;
         this.removeEventListener('click', playerTurn);
-        
-        let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
         
         if(player == "X"){
             addSymbolToNode(this, "X", "images/x.png");
         }
         else{
             addSymbolToNode(this, "O", "images/o.png");
-        } 
+        }
+        
 
+        let thisBoxID = parseInt(this.getAttribute('data-id'), 10);
         socket.emit('turn', {player: player, boxID: thisBoxID, count: count});
-        console.log("count on socket emit: " + count);
+
+        
         
         // change turn for current(sending) socket
         playertoMove = !playertoMove;
         
         if(playertoMove){
-            document.querySelector(".boxes-overlay").style.display = "none";
+            boxOverlay.style.display = "none";
             currPlayer.innerHTML = "Your turn";
         } 
         else{
-            document.querySelector(".boxes-overlay").style.display = "block";
+            boxOverlay.style.display = "block";
             currPlayer.innerHTML = "Opponent's turn";
         } 
         
+        
+        
         // check for winner
         winner = (checkForWinner(thisBoxID,player)) ? player : '';
-        if(winner != ''){
+        if(winner){
             endgame();
-            result.innerHTML = `Yay! you have won.`;
+            result.innerHTML = "Yay! you have won.";
             
             // emit winner event with winner
             socket.emit('winner', winner);
         }
         else if(checkforTie()){
-            endgame();
-            result.innerHTML = `Game Tied.`;
+            //endgame();
+            result.innerHTML = "Game Tied.";
             
             // emit winner event with tie
             socket.emit('winner', 'tie');
         }
     }
 
-    
-    
-    socket.on('turn', msg => {
-
-        let targetBox = document.getElementById(`box${msg.boxID + 1}`);
-        targetBox.removeEventListener('click', playerTurn);
-
-        if(msg.player == "X"){
-            addSymbolToNode(targetBox, "X", "images/x.png");
-        }
-        else{
-            addSymbolToNode(targetBox, "O", "images/o.png");
-        }
-
-        // change turn for other(receiving) socket
-        playertoMove = !playertoMove;
-
-        if(playertoMove){
-            document.querySelector(".boxes-overlay").style.display = "none";
-            currPlayer.innerHTML = "Your turn";
-        } 
-        else{
-            document.querySelector(".boxes-overlay").style.display = "block";
-            currPlayer.innerHTML = "Opponent's turn";
-        }
-
-        count = msg.count
-        console.log("count on socket receive: "+count);
-    })
-
-    
-    
-    socket.on('winner', msg => {
-        if(msg != 'tie'){
-            endgame();
-            result.innerHTML = `Sorry! ${msg} has won.`;
-        }else{
-            endgame();
-            result.innerHTML = `Game Tied.`;
-        }
-    })
 
 
-    
     // create image element with turn symbol
-    // append image to box
+    // append image to box node
     function addSymbolToNode(node, value, src){
         let img = document.createElement("img");
         img.setAttribute("src", src);
         node.appendChild(img);
-        node.setAttribute("value", "X");
+        node.setAttribute("value", value);
     }
-    
-    
-    
+
+
+
+
     // check grid for possible win
 
     // 0 1 2
@@ -272,13 +226,19 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     
+    
     // game over
+    // -> remove all (remaining) event listeners
+    // -> remove current player
+    // -> add "new game" button
     function endgame(){
         for(let i=0; i<boxes.length; i++){
             boxes.item(i).removeEventListener('click', playerTurn);
         }
 
+
         currPlayer.innerHTML = "";
+        
         
         let btn = document.createElement('button');
         btn.innerHTML = 'New Game?';
@@ -289,10 +249,92 @@ document.addEventListener('DOMContentLoaded', function(){
             window.location.reload();
         })
     }
+    
 
     
+    // check for tie
     function checkforTie(){
         return count === 9;
     }
+
+
+
+    // ** socket code **
+
+
+    // game begin (received on both sockets)
+    // -> change game status
+    // -> assign player X first turn to move
+    // -> display transparent overlay over opponent's board
+    // -> setup game board
+    socket.on("game begin", playerData => {
+        gameStatus.innerHTML = "Game started"
+        
+        player = playerData.player;
+        if(player == "X"){
+            playertoMove = true;
+            currPlayer.innerHTML = "Your turn";
+        }
+        else{
+            document.querySelector(".boxes-overlay").style.display = "block";
+            playertoMove = false;
+            currPlayer.innerHTML = "Opponent's turn";
+        }
+
+        gameSetup();
+    })
+
+
+    
+    // opponent socket receives turn data
+    // -> get targetbox by box id in turn data
+    // -> add corresponding symbol
+    // -> change playerToMove 
+    //    (to signify this socket's turn)
+    // -> add count received in turn data to this socket's global count
+    socket.on('turn', turnData => {
+        let targetBox = document.getElementById(`box${turnData.boxID + 1}`);
+        targetBox.removeEventListener('click', playerTurn);
+
+        if(turnData.player == "X"){
+            addSymbolToNode(targetBox, "X", "images/x.png");
+        }
+        else{
+            addSymbolToNode(targetBox, "O", "images/o.png");
+        }
+
+        
+        
+        // change turn for other(receiving) socket
+        playertoMove = !playertoMove;
+
+        if(playertoMove){
+            boxOverlay.style.display = "none";
+            currPlayer.innerHTML = "Your turn";
+        } 
+        else{
+            boxOverlay.style.display = "block";
+            currPlayer.innerHTML = "Opponent's turn";
+        }
+
+        
+        
+        count = turnData.count;
+    })
+
+    
+    
+    // event received on win or tie
+    // -> endgame and display result
+    socket.on('winner', winner => {
+        if(winner != 'tie'){
+            endgame();
+            result.innerHTML = `Sorry! ${winner} has won.`;
+        }else{
+            //endgame(); (since each box is already selected)
+            result.innerHTML = `Game Tied.`;
+        }
+    })
+
 
 });
