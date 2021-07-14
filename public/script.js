@@ -1,5 +1,6 @@
+var socket = io();
 document.addEventListener('DOMContentLoaded', function(){
-    var socket = io();
+    // var socket = io();
 
     const b0 = document.getElementById('box1'); //0
     const b1 = document.getElementById('box2'); //1
@@ -279,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function(){
             document.querySelector(".boxes-overlay").style.display = "block";
             playertoMove = false;
             currPlayer.innerHTML = "Opponent's turn";
+            // document.querySelector(".flipCardInner").style.transform = "rotateY(180deg)";
         }
 
         gameSetup();
@@ -338,3 +340,9 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 });
+
+function startGame(){
+    //flip wrapper
+    document.querySelector(".flipCardInner").style.transform = "rotateY(180deg)";
+    socket.emit("game-trigger");
+}

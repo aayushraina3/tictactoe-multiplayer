@@ -41,16 +41,29 @@ function getOpponent(socket) {
 io.on('connection', (socket) => {
     console.log(`player connected : ${socket.id}`);
     
-    playerJoined(socket);
+    socket.on("game-trigger", ()=>{
+        playerJoined(socket);
 
-    if (getOpponent(socket)) {
-        socket.emit('game begin', {
-            player: players[socket.id].player
-        });
-        getOpponent(socket).emit('game begin', {
-            player: players[getOpponent(socket).id].player
-        });
-    }
+        if (getOpponent(socket)) {
+            socket.emit('game begin', {
+                player: players[socket.id].player
+            });
+            getOpponent(socket).emit('game begin', {
+                player: players[getOpponent(socket).id].player
+            });
+        }
+    })
+
+    // playerJoined(socket);
+
+    // if (getOpponent(socket)) {
+    //     socket.emit('game begin', {
+    //         player: players[socket.id].player
+    //     });
+    //     getOpponent(socket).emit('game begin', {
+    //         player: players[getOpponent(socket).id].player
+    //     });
+    // }
 
     socket.on('turn', turnData => {
         socket.broadcast.emit('turn', turnData);
