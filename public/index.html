@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <title>Tic-Tac-Toe</title>
 </head>
@@ -11,18 +12,19 @@
     <div class="wrapper flipCard">
         <div class="flipCardInner">
             <div class="flipCardFront">
-                <div class="heading">
-                    <h1>Tic-Tac-Toe</h1>
+                <div class="heading-front">
+                    TIC-TAC-TOE
                 </div>
+                <div class="subheading-front">Play tic-tac-toe with your friends <i class="fas fa-thumbs-up"></i></div>
                 <button class="start-btn" onclick="startGame()">Play</button>
 
                 <!-- <p id="status">Waiting for other player to join...</p> -->
             </div>
             <div class="flipCardBack">
                 <div class="heading">
-                    <p id="turn"><span id='currPlayer'></span></p>
+                    <p id="turn"><span id='currPlayer'>Waiting for other player to join...</span></p>
                 </div>
-                <p id="status">Waiting for other player to join...</p>
+                <!-- <p id="status">Waiting for other player to join...</p> -->
                 <div class="boxes-overlay"></div>
                 <div class="boxes">
                     <div class="box" id="box1"></div>

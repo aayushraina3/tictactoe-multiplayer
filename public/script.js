@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const resultDiv = document.getElementById('resultDiv');
     const boxOverlay = document.querySelector(".boxes-overlay");
     const boxes = document.getElementsByClassName('box');
-    const gameStatus = document.getElementById("status");
+    // const gameStatus = document.getElementById("status");
 
     
     // no of boxes played
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function(){
     // -> display transparent overlay over opponent's board
     // -> setup game board
     socket.on("game begin", playerData => {
-        gameStatus.innerHTML = "Game started"
+        // gameStatus.innerHTML = "Game started"
         
         player = playerData.player;
         if(player == "X"){
